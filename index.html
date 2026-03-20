@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Чат-бот Библиотеки</title>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        /* Стиль кнопки вызова чата - Зеленая тема */
+        #chat-button {
+            position: fixed; bottom: 20px; right: 20px;
+            width: 65px; height: 65px; background: #2ea44f; /* Благородный зеленый */
+            border-radius: 50%; color: white; border: none;
+            cursor: pointer; font-size: 28px; box-shadow: 0 4px 15px rgba(46, 164, 79, 0.4);
+            transition: transform 0.2s; z-index: 1000;
+        }
+        #chat-button:hover { transform: scale(1.05); }
+        
+        /* Окно чата - Увеличенное */
+        #chat-window {
+            display: none; position: fixed; bottom: 95px; right: 20px;
+            width: 450px; height: 600px; 
+            background: white; border-radius: 12px; 
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            flex-direction: column; overflow: hidden; 
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            z-index: 1000;
+        }
+        
+        /* Шапка чата */
+        .chat-header {
+            background: #2ea44f; color: white; padding: 16px; 
+            font-weight: 600; font-size: 16px; display: flex; 
+            justify-content: space-between; align-items: center;
+        }
+        
+        /* Зона сообщений */
+        #messages { 
+            flex: 1; padding: 15px; overflow-y: auto; background: #f4f7f6; 
+            display: flex; flex-direction: column;
+        }
+        
+        /* Пузыри сообщений */
+        .msg { 
+            margin-bottom: 12px; padding: 10px 14px; 
+            border-radius: 18px; max-width: 80%; line-height: 1.4; font-size: 15px;
+            word-wrap: break-word;
+        }
+        /* Фикс для абзацев от Markdown, чтобы не было лишних отступов */
+        .msg p { margin: 0; padding: 0; }
+        .msg ul, .msg ol { margin: 5px 0 0 20px; padding: 0; }
+
+        .user { 
+            background: #2ea44f; color: white; align-self: flex-end; 
+            border-bottom-right-radius: 4px; /* Уголок как в мессенджерах */
+        }
+        .bot { 
+            background: #e9ecef; color: #333; align-self: flex-start;
+            border-bottom-left-radius: 4px;
+        }
+        
+        /* Зона ввода */
+        #input-area { 
+            display: flex; padding: 12px; border-top: 1px solid #eee; background: white;
+        }
+        #user-input { 
+            flex: 1; border: 1px solid #ccc; border-radius: 20px; 
+            padding: 10px 15px; outline: none; font-size: 14px;
+            transition: border-color 0.2s;
+        }
+        #user-input:focus { border-color: #2ea44f; }
+        
+        /* Кнопка отправки */
+        .send-btn { 
+            margin-left: 8px; border: none; background: #2ea44f; color: white; 
+            border-radius: 20px; padding: 0 16px; cursor: pointer; 
+            font-weight: bold; transition: background 0.2s;
+        }
+        .send-btn:hover { background: #25863f; }
+    </style>
+</head>
+<body>
+
+<button id="chat-button" onclick="toggleChat()">💬</button>
+
+<div id="chat-window">
+    <div class="chat-header">
+        <span>📚 Ассистент ShqoLib</span>
+        <span style="cursor: pointer; font-size: 20px;" onclick="toggleChat()">×</span>
+    </div>
+    <div id="messages"></div>
+    <div id="input-area">
+        <input type="text" id="user-input" placeholder="Введите ваш вопрос..." onkeypress="handleKeyPress(event)">
+        <button class="send-btn" onclick="sendMessage()">➤</button>
+    </div>
+</div>
+
+<script>
+    // Настраиваем библиотеку marked для безопасного и правильного отображения переносов строк
+    marked.setOptions({
+        breaks: true, // Превращает переносы строк (Enter) в теги <br>
+        gfm: true     // Включает поддержку списков и прочих удобств
+    });
+
+    let isFirstOpen = true;
+
+    function toggleChat() {
+        const win = document.getElementById('chat-window');
+        win.style.display = win.style.display === 'none' || win.style.display === '' ? 'flex' : 'none';
+        
+        if (isFirstOpen && win.style.display === 'flex') {
+            const welcomeText = "Қайырлы күн! Мен кітапхананың виртуалды көмекшісімін. Сұрақтарыңызды қойсаңыз болады.\n\n" +
+                                "Добрый день! Я виртуальный помощник библиотеки. Буду рад помочь Вам с любым вопросом.";
+            
+            addMessage(welcomeText, 'bot');
+            isFirstOpen = false;
+        }
+    }
+
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') {
+            sendMessage();
+        }
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('user-input');
+        const text = input.value.trim();
+        if (!text) return;
+
+        addMessage(text, 'user');
+        input.value = '';
+
+        const loadingId = 'loading-' + Date.now();
+        addMessage('Печатает...', 'bot', loadingId);
+
+        try {
+            const response = await fetch('http://https://michele-nonreligious-inviolably.ngrok-free.dev/api/v1/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: text })
+            });
+            const data = await response.json();
+            
+            document.getElementById(loadingId).remove();
+            addMessage(data.answer, 'bot');
+        } catch (e) {
+            document.getElementById(loadingId).remove();
+            addMessage('Извините, сервер временно недоступен.', 'bot');
+        }
+    }
+
+    function addMessage(text, side, id = null) {
+        const div = document.createElement('div');
+        div.className = `msg ${side}`;
+        
+        // Превращаем Markdown-звездочки в HTML-разметку (жирный текст)
+        div.innerHTML = marked.parse(text);
+        
+        if (id) div.id = id;
+        document.getElementById('messages').appendChild(div);
+        
+        const msgContainer = document.getElementById('messages');
+        msgContainer.scrollTop = msgContainer.scrollHeight;
+    }
+</script>
+</body>
+</html>
