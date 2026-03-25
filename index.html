@@ -5,17 +5,15 @@
     <title>Чат-бот Библиотеки</title>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        /* Стиль кнопки вызова чата - Зеленая тема */
         #chat-button {
             position: fixed; bottom: 20px; right: 20px;
-            width: 65px; height: 65px; background: #2ea44f; /* Благородный зеленый */
+            width: 65px; height: 65px; background: #2ea44f; 
             border-radius: 50%; color: white; border: none;
             cursor: pointer; font-size: 28px; box-shadow: 0 4px 15px rgba(46, 164, 79, 0.4);
             transition: transform 0.2s; z-index: 1000;
         }
         #chat-button:hover { transform: scale(1.05); }
         
-        /* Окно чата - Увеличенное */
         #chat-window {
             display: none; position: fixed; bottom: 95px; right: 20px;
             width: 450px; height: 600px; 
@@ -26,39 +24,34 @@
             z-index: 1000;
         }
         
-        /* Шапка чата */
         .chat-header {
             background: #2ea44f; color: white; padding: 16px; 
             font-weight: 600; font-size: 16px; display: flex; 
             justify-content: space-between; align-items: center;
         }
         
-        /* Зона сообщений */
         #messages { 
             flex: 1; padding: 15px; overflow-y: auto; background: #f4f7f6; 
             display: flex; flex-direction: column;
         }
         
-        /* Пузыри сообщений */
         .msg { 
             margin-bottom: 12px; padding: 10px 14px; 
             border-radius: 18px; max-width: 80%; line-height: 1.4; font-size: 15px;
             word-wrap: break-word;
         }
-        /* Фикс для абзацев от Markdown, чтобы не было лишних отступов */
         .msg p { margin: 0; padding: 0; }
         .msg ul, .msg ol { margin: 5px 0 0 20px; padding: 0; }
 
         .user { 
             background: #2ea44f; color: white; align-self: flex-end; 
-            border-bottom-right-radius: 4px; /* Уголок как в мессенджерах */
+            border-bottom-right-radius: 4px; 
         }
         .bot { 
             background: #e9ecef; color: #333; align-self: flex-start;
             border-bottom-left-radius: 4px;
         }
         
-        /* Зона ввода */
         #input-area { 
             display: flex; padding: 12px; border-top: 1px solid #eee; background: white;
         }
@@ -69,7 +62,6 @@
         }
         #user-input:focus { border-color: #2ea44f; }
         
-        /* Кнопка отправки */
         .send-btn { 
             margin-left: 8px; border: none; background: #2ea44f; color: white; 
             border-radius: 20px; padding: 0 16px; cursor: pointer; 
@@ -95,10 +87,9 @@
 </div>
 
 <script>
-    // Настраиваем библиотеку marked для безопасного и правильного отображения переносов строк
     marked.setOptions({
-        breaks: true, // Превращает переносы строк (Enter) в теги <br>
-        gfm: true     // Включает поддержку списков и прочих удобств
+        breaks: true, 
+        gfm: true     
     });
 
     let isFirstOpen = true;
@@ -108,8 +99,8 @@
         win.style.display = win.style.display === 'none' || win.style.display === '' ? 'flex' : 'none';
         
         if (isFirstOpen && win.style.display === 'flex') {
-            const welcomeText = "Сәлеметсіз бе! Мен кітапхананың виртуалды көмекшісімін. Сұрақтарыңызды қойсаңыз болады.\n\n" +
-                                "Приветствую! Я виртуальный помощник библиотеки. Буду рад помочь Вам с любым вопросом.";
+            const welcomeText = "Сәлеметсіз бе! Мен Шығыс Қазақстан балалар-жасөспірімдер кітапханасының виртуалды көмекшісімін. Сұрақтарыңызды қойсаңыз болады.\n\n" +
+                                "Здравствуйте! Я виртуальный помощник Восточно-Казахстанской детско-юношеской библиотеки. Буду рад помочь Вам с любым вопросом.";
             
             addMessage(welcomeText, 'bot');
             isFirstOpen = false;
@@ -153,7 +144,6 @@
         const div = document.createElement('div');
         div.className = `msg ${side}`;
         
-        // Превращаем Markdown-звездочки в HTML-разметку (жирный текст)
         div.innerHTML = marked.parse(text);
         
         if (id) div.id = id;
