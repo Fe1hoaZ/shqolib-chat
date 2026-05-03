@@ -94,6 +94,13 @@
 
     let isFirstOpen = true;
 
+    // --- Генерируем или получаем ID сессии пользователя ---
+    let sessionId = localStorage.getItem('shqolib_session_id');
+    if (!sessionId) {
+        sessionId = 'user_' + Math.random().toString(36).substr(2, 9);
+        localStorage.setItem('shqolib_session_id', sessionId);
+    }
+
     function toggleChat() {
         const win = document.getElementById('chat-window');
         win.style.display = win.style.display === 'none' || win.style.display === '' ? 'flex' : 'none';
@@ -128,7 +135,12 @@
             const response = await fetch('https://michele-nonreligious-inviolably.ngrok-free.dev/api/v1/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: text })
+                // --- Отправляем на сервер обновленный JSON ---
+                body: JSON.stringify({ 
+                    session_id: sessionId,
+                    message: text,
+                    language: "ru"
+                })
             });
             const data = await response.json();
             
