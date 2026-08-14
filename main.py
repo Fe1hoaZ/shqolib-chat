@@ -69,6 +69,10 @@ class ChatRequest(BaseModel):
     message: str
     language: str = "ru"
 
+@app.get("/")
+async def health_check():
+    return {"status": "ok", "message": "ShqoLib AI Server is running!"}
+
 @app.post("/api/v1/chat")
 async def chat_endpoint(request: ChatRequest):
     user_text = request.message
